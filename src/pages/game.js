@@ -2,11 +2,12 @@ import React, { Component } from "react"
 import { Link } from "gatsby"
 import axios from "axios"
 
+import { GiSwordman } from "react-icons/gi";
 import Layout from "../components/layout"
 import SEO from "../components/seo"
 // import { backendURL } from "../../gatsby-config"
 
-import "./page-2.css"
+import "./game.css"
 
 class SecondPage extends Component {
   state = {
@@ -103,7 +104,11 @@ class SecondPage extends Component {
         <div id="mapBox">
           {this.state.maze.map((row, row_index) => {
             return row.map((cell, column_index) => {
-              return <span key={row_index + column_index} className={`mapCell${cell.n || row_index === 0 ? " north" : ""}${cell.e || column_index === row.length-1 ? " east" : ""}${cell.s || row_index === this.state.maze.length-1 ? " south" : ""}${cell.w || column_index === 0 ? " west" : ""}`} data-x={row_index} data-y={column_index}></span>
+              const processedClass = `mapCell${cell.n || row_index === 0 ? " north" : ""}${cell.e || column_index === row.length-1 ? " east" : ""}${cell.s || row_index === this.state.maze.length-1 ? " south" : ""}${cell.w || column_index === 0 ? " west" : ""}`
+              if (row_index === 0 && column_index === 0) {
+                return <span key={row_index + column_index} className={processedClass} data-x={row_index} data-y={column_index}><GiSwordman /></span>
+              }
+              return <span key={row_index + column_index} className={processedClass} data-x={row_index} data-y={column_index} />
             })
           })}
         </div>
