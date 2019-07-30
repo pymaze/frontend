@@ -73,28 +73,29 @@ class SecondPage extends Component {
     //   })
     switch(direction) {
       case "n":
-        if (!this.state.maze[this.state.playerY][this.state.playerX].n) {
+        if (this.state.playerY > 0 && !this.state.maze[this.state.playerY][this.state.playerX].n) {
           this.setState({ playerY: this.state.playerY - 1 })
         }
         break;
       case "e":
-        if (!this.state.maze[this.state.playerY][this.state.playerX].e) {
+        if (this.state.playerX < this.state.maze[0].length - 1 && !this.state.maze[this.state.playerY][this.state.playerX].e) {
           this.setState({ playerX: this.state.playerX + 1 })
         }
         break;
       case "s":
-        if (!this.state.maze[this.state.playerY][this.state.playerX].s) {
+        if (this.state.playerY < this.state.maze.length - 1 && !this.state.maze[this.state.playerY][this.state.playerX].s) {
           this.setState({ playerY: this.state.playerY + 1 })
         }
         break;
       case "w":
-        if (!this.state.maze[this.state.playerY][this.state.playerX].w) {
+        if (this.state.playerX > 0 && !this.state.maze[this.state.playerY][this.state.playerX].w) {
           this.setState({ playerX: this.state.playerX - 1 })
         }
         break;
       default:
         break;
     }
+    console.log(this.state.playerX, this.state.playerY)
   }
 
   keyPressed = e => {
