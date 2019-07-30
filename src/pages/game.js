@@ -11,7 +11,8 @@ import "./game.css"
 
 class SecondPage extends Component {
   state = {
-    backendURL: "https://build-week-civil-disobedients.herokuapp.com",
+    playerX: 0,
+    playerY: 0,
     error_msg: "",
     name: "",           // *** Name of the logged-in player
     title: "",          // *** Title of the current room
@@ -22,7 +23,8 @@ class SecondPage extends Component {
       [{ "n": true, "e": true, "s": false, "w": false }, { "n": false, "e": false, "s": true, "w": true }, { "n": true, "e": true, "s": false, "w": false }, { "n": false, "e": false, "s": false, "w": true }],
       [{ "n": false, "e": false, "s": true, "w": false }, { "n": true, "e": false, "s": true, "w": false }, { "n": false, "e": false, "s": false, "w": false }, { "n": false, "e": false, "s": false, "w": false }],
       [{ "n": true, "e": true, "s": false, "w": false }, { "n": true, "e": false, "s": false, "w": true }, { "n": false, "e": true, "s": true, "w": false }, { "n": false, "e": false, "s": false, "w": true }]
-    ]
+    ],
+    backendURL: "https://build-week-civil-disobedients.herokuapp.com"
   }
 
   componentDidMount() {
@@ -34,7 +36,7 @@ class SecondPage extends Component {
     document.removeEventListener("keydown", this.keyPressed, false);
   }
 
-  getRooms() {
+  getRooms = () => {
       axios.get(`${this.state.backendURL}/api/rooms`, { headers: { "Access-Control-Allow-Origin": "*" } })
     // axios.get(`${this.state.backendURL}/api/rooms`, { headers: { "Authorization": "Bearer " + "6493c3550c33600a9445e035f5a06a5648bbc3ce"} })
       .then(res => {
@@ -46,7 +48,7 @@ class SecondPage extends Component {
       })
   }
 
-  initialize() {
+  initialize = () => {
     axios.get(`${this.state.backendURL}/api/adv/init`, { headers: { "Authorization": "Bearer 6493c3550c33600a9445e035f5a06a5648bbc3ce"} })
       .then(res => {
         const { uuid, ...newState} = res.data;
@@ -57,45 +59,65 @@ class SecondPage extends Component {
       })
   }
 
-  move(direction) {
-    axios.post("https://lambda-mud-test.herokuapp.com/api/adv/move", { direction: direction}, { headers: { "Authorization": "Bearer 6493c3550c33600a9445e035f5a06a5648bbc3ce"} })
-      .then(res => {
-        if (res.data.error_msg.length > 0) {
-          console.log(res.data.error_msg)
-        } else {
-          this.setState(res.data);
+  move = direction => {
+    // axios.post("https://lambda-mud-test.herokuapp.com/api/adv/move", { direction: direction}, { headers: { "Authorization": "Bearer 6493c3550c33600a9445e035f5a06a5648bbc3ce"} })
+    //   .then(res => {
+    //     if (res.data.error_msg.length > 0) {
+    //       console.log(res.data.error_msg)
+    //     } else {
+    //       this.setState(res.data);
+    //     }
+    //   })
+    //   .catch(err => {
+    //     console.log(err)
+    //   })
+    switch(direction) {
+      case "n":
+        if (!this.state.maze[this.state.playerY][this.state.playerX].n) {
+          this.setState({ playerY: this.state.playerY - 1 })
         }
-      })
-      .catch(err => {
-        console.log(err)
-      })
+        break;
+      case "e":
+        if (!this.state.maze[this.state.playerY][this.state.playerX].e) {
+          this.setState({ playerX: this.state.playerX + 1 })
+        }
+        break;
+      case "s":
+        if (!this.state.maze[this.state.playerY][this.state.playerX].s) {
+          this.setState({ playerY: this.state.playerY + 1 })
+        }
+        break;
+      case "w":
+        if (!this.state.maze[this.state.playerY][this.state.playerX].w) {
+          this.setState({ playerX: this.state.playerX - 1 })
+        }
+        break;
+      default:
+        break;
+    }
   }
 
-  keyPressed(e) {
+  keyPressed = e => {
     if (e.key === "ArrowUp" || e.key === "w") {
-      console.log("UP")
       e.preventDefault();
-      // this.move("n");
+      this.move("n");
     }
     if (e.key === "ArrowDown" || e.key === "s") {
-      console.log("DOWN")
       e.preventDefault();
-      // this.move("s");
+      this.move("s");
     }
     if (e.key === "ArrowLeft" || e.key === "a") {
-      console.log("LEFT")
       e.preventDefault();
-      // this.move("w");
+      this.move("w");
     }
     if (e.key === "ArrowRight" || e.key === "d") {
-      console.log("RIGHT")
       e.preventDefault();
-      // this.move("e");
+      this.move("e");
     }
   }
 
   render() {
-    const { name, title, description, players } = this.state;
+    const { playerX, playerY, name, title, description, players } = this.state;
     return (
       <Layout>
         <script src="https://d3js.org/d3.v3.min.js" charSet="utf-8"></script>
@@ -105,7 +127,7 @@ class SecondPage extends Component {
           {this.state.maze.map((row, row_index) => {
             return row.map((cell, column_index) => {
               const processedClass = `mapCell${cell.n || row_index === 0 ? " north" : ""}${cell.e || column_index === row.length-1 ? " east" : ""}${cell.s || row_index === this.state.maze.length-1 ? " south" : ""}${cell.w || column_index === 0 ? " west" : ""}`
-              if (row_index === 0 && column_index === 0) {
+              if (row_index === playerY && column_index === playerX) {
                 return <span key={row_index + column_index} className={processedClass} data-x={row_index} data-y={column_index}><GiSwordman /></span>
               }
               return <span key={row_index + column_index} className={processedClass} data-x={row_index} data-y={column_index} />
