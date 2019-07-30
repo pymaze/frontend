@@ -4,11 +4,13 @@ import axios from "axios"
 
 import Layout from "../components/layout"
 import SEO from "../components/seo"
+// import { backendURL } from "../../gatsby-config"
 
 import "./page-2.css"
 
 class SecondPage extends Component {
   state = {
+    backendURL: "https://build-week-civil-disobedients.herokuapp.com",
     error_msg: "",
     name: "",           // *** Name of the logged-in player
     title: "",          // *** Title of the current room
@@ -23,7 +25,28 @@ class SecondPage extends Component {
   }
 
   componentDidMount() {
-    axios.get("https://lambda-mud-test.herokuapp.com/api/adv/init", { headers: { "Authorization": "bearer " + "6493c3550c33600a9445e035f5a06a5648bbc3ce"} })
+    document.addEventListener("keydown", this.keyPressed, false);
+    this.getRooms();
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener("keydown", this.keyPressed, false);
+  }
+
+  getRooms() {
+      axios.get(`${this.state.backendURL}/api/rooms`, { headers: { "Access-Control-Allow-Origin": "*" } })
+    // axios.get(`${this.state.backendURL}/api/rooms`, { headers: { "Authorization": "Bearer " + "6493c3550c33600a9445e035f5a06a5648bbc3ce"} })
+      .then(res => {
+        console.log(res.data)
+        // this.setState({ maze: res.data.rooms });
+      })
+      .catch(err => {
+        console.log(err)
+      })
+  }
+
+  initialize() {
+    axios.get(`${this.state.backendURL}/api/adv/init`, { headers: { "Authorization": "Bearer 6493c3550c33600a9445e035f5a06a5648bbc3ce"} })
       .then(res => {
         const { uuid, ...newState} = res.data;
         this.setState(newState);
@@ -34,7 +57,7 @@ class SecondPage extends Component {
   }
 
   move(direction) {
-    axios.post("https://lambda-mud-test.herokuapp.com/api/adv/move", { direction: direction}, { headers: { "Authorization": "Bearer " + "6493c3550c33600a9445e035f5a06a5648bbc3ce"} })
+    axios.post("https://lambda-mud-test.herokuapp.com/api/adv/move", { direction: direction}, { headers: { "Authorization": "Bearer 6493c3550c33600a9445e035f5a06a5648bbc3ce"} })
       .then(res => {
         if (res.data.error_msg.length > 0) {
           console.log(res.data.error_msg)
@@ -47,17 +70,40 @@ class SecondPage extends Component {
       })
   }
 
+  keyPressed(e) {
+    if (e.key === "ArrowUp" || e.key === "w") {
+      console.log("UP")
+      e.preventDefault();
+      // this.move("n");
+    }
+    if (e.key === "ArrowDown" || e.key === "s") {
+      console.log("DOWN")
+      e.preventDefault();
+      // this.move("s");
+    }
+    if (e.key === "ArrowLeft" || e.key === "a") {
+      console.log("LEFT")
+      e.preventDefault();
+      // this.move("w");
+    }
+    if (e.key === "ArrowRight" || e.key === "d") {
+      console.log("RIGHT")
+      e.preventDefault();
+      // this.move("e");
+    }
+  }
+
   render() {
-    const { name, title, description, players, maze } = this.state;
+    const { name, title, description, players } = this.state;
     return (
       <Layout>
-        <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+        <script src="https://d3js.org/d3.v3.min.js" charSet="utf-8"></script>
         <SEO title="The Maze" />
         <h1>Hi from the second page</h1>
         <div id="mapBox">
           {this.state.maze.map((row, row_index) => {
             return row.map((cell, column_index) => {
-              return <span className={`mapCell${cell.n || row_index === 0 ? " north" : ""}${cell.e || column_index === row.length-1 ? " east" : ""}${cell.s || row_index === this.state.maze.length-1 ? " south" : ""}${cell.w || column_index === 0 ? " west" : ""}`} data-x={row_index} data-y={column_index}></span>
+              return <span key={row_index + column_index} className={`mapCell${cell.n || row_index === 0 ? " north" : ""}${cell.e || column_index === row.length-1 ? " east" : ""}${cell.s || row_index === this.state.maze.length-1 ? " south" : ""}${cell.w || column_index === 0 ? " west" : ""}`} data-x={row_index} data-y={column_index}></span>
             })
           })}
         </div>
@@ -67,7 +113,7 @@ class SecondPage extends Component {
           <p>{description}</p>
           <p>
             Players:
-            {players.map(p => <span>{" " + p}</span>)}
+            {players.map(p => <span key={p}>{" " + p}</span>)}
           </p>
         </div>
         <Link to="/">Go back to the homepage</Link>
