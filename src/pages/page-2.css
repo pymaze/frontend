@@ -1,0 +1,21 @@
+#mapBox {
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 330px;
+}
+.mapCell {
+  height: 80px;
+  width: 80px;
+}
+.north {
+  border-top: 1px solid black;
+}
+.east {
+  border-right: 1px solid black;
+}
+.south {
+  border-bottom: 1px solid black;
+}
+.west {
+  border-left: 1px solid black;
+}

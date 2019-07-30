@@ -4,58 +4,16 @@ import { Link } from "gatsby"
 import Layout from "../components/layout"
 import SEO from "../components/seo"
 
+import "./page-2.css"
+
 class SecondPage extends Component {
-  
-  componentDidMount() {
-    let gridData = this.gridData();
-    var grid = d3.select("#grid")
-      .append("svg")
-      .attr("width","510px")
-      .attr("height","510px");
-    var row = grid.selectAll(".row")
-      .data(gridData)
-      .enter().append("g")
-      .attr("class", "row");
-    var column = row.selectAll(".square")
-      .data(function(d) { return d; })
-      .enter().append("rect")
-      .attr("class","square")
-      .attr("x", function(d) { return d.x; })
-      .attr("y", function(d) { return d.y; })
-      .attr("width", function(d) { return d.width; })
-      .attr("height", function(d) { return d.height; })
-      .style("fill", "#fff")
-      .style("stroke", "#222");
-  }
-
-  gridData() {
-    var data = new Array();
-    var xpos = 1; //starting xpos and ypos at 1 so the stroke will show when we make the grid below
-    var ypos = 1;
-    var width = 50;
-    var height = 50;
-
-    // iterate for rows 
-    for (var row = 0; row < 10; row++) {
-        data.push( new Array() );
-
-        // iterate for cells/columns inside rows
-        for (var column = 0; column < 10; column++) {
-            data[row].push({
-                x: xpos,
-                y: ypos,
-                width: width,
-                height: height
-            })
-            // increment the x position. I.e. move it over by 50 (width variable)
-            xpos += width;
-        }
-        // reset the x position after a row is complete
-        xpos = 1;
-        // increment the y position for the next row. Move it down 50 (height variable)
-        ypos += height; 
-    }
-    return data;
+  state = {
+    maze: [
+      [{ "n": false, "e": false, "s": true, "w": false }, { "n": false, "e": true, "s": false, "w": false }, { "n": false, "e": false, "s": true, "w": true }, { "n": false, "e": false, "s": false, "w": false }],
+      [{ "n": true, "e": true, "s": false, "w": false }, { "n": false, "e": false, "s": true, "w": true }, { "n": true, "e": true, "s": false, "w": false }, { "n": false, "e": false, "s": false, "w": true }],
+      [{ "n": false, "e": false, "s": true, "w": false }, { "n": true, "e": false, "s": true, "w": false }, { "n": false, "e": false, "s": false, "w": false }, { "n": false, "e": false, "s": false, "w": false }],
+      [{ "n": true, "e": true, "s": false, "w": false }, { "n": true, "e": false, "s": false, "w": true }, { "n": false, "e": true, "s": true, "w": false }, { "n": false, "e": false, "s": false, "w": true }]
+    ]
   }
 
   render() {
@@ -64,7 +22,15 @@ class SecondPage extends Component {
         <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
         <SEO title="The Maze" />
         <h1>Hi from the second page</h1>
-        <div id="grid"></div>
+        <div id="mapBox">
+          {this.state.maze.map((row, row_index) => {
+            console.log("first map")
+            return row.map((cell, column_index) => {
+              console.log("second_map")
+              return <span className={`mapCell${cell.n || row_index === 0 ? " north" : ""}${cell.e || column_index === row.length-1 ? " east" : ""}${cell.s || row_index === this.state.maze.length-1 ? " south" : ""}${cell.w || column_index === 0 ? " west" : ""}`} data-x={row_index} data-y={column_index}></span>
+            })
+          })}
+        </div>
         <Link to="/">Go back to the homepage</Link>
       </Layout>
     )
