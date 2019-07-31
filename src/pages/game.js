@@ -19,14 +19,10 @@ const GameSquare = styled.div`
   border-style: solid;
   height: ${props => `calc(100% / ${props.rows}em)`};
   border-color: black;
-  border-top-width: ${props =>
-    props.direction.includes("north") ? `1px` : "0px"};
-  border-right-width: ${props =>
-    props.direction.includes("east") ? `1px` : "0px"};
-  border-bottom-width: ${props =>
-    props.direction.includes("south") ? `1px` : "0px"};
-  border-left-width: ${props =>
-    props.direction.includes("west") ? `1px` : "0px"};
+  border-top-width: ${({ border }) => (border.top ? `1px` : "0px")};
+  border-right-width: ${({ border }) => (border.right ? `1px` : "0px")};
+  border-bottom-width: ${({ border }) => (border.bottom ? `1px` : "0px")};
+  border-left-width: ${({ border }) => (border.left ? `1px` : "0px")};
 `
 
 const GameBox = styled.div`
@@ -176,28 +172,25 @@ class SecondPage extends Component {
   render() {
     const { playerX, playerY, name, title, description, players } = this.state
 
+    const getBorders = (row, row_i, cell, col_i) => ({
+      top: cell.n || row_i === 0,
+      right: cell.e || col_i === row.length - 1,
+      bottom: cell.s || row_i === this.state.maze.length - 1,
+      left: cell.w || col_i === 0,
+    })
+
     const GameRows = () =>
       this.state.maze.map((row, row_i) =>
-        row.map((cell, col_i) => {
-          const processedClass = `${cell.n || row_i === 0 ? "north" : ""}${
-            cell.e || col_i === row.length - 1 ? " east" : ""
-          }${cell.s || row_i === this.state.maze.length - 1 ? " south" : ""}${
-            cell.w || col_i === 0 ? " west" : ""
-          }`
-
-          return row_i === playerY && col_i === playerX ? (
-            <GameSquare
-              key={row_i + col_i}
-              direction={processedClass}
-              data-x={row_i}
-              data-y={col_i}
-            >
-              <GiSwordman />
-            </GameSquare>
-          ) : (
-            <GameSquare key={row_i + col_i} direction={processedClass} />
-          )
-        })
+        row.map((cell, col_i) => (
+          <GameSquare
+            key={row_i + col_i}
+            data-x={row_i}
+            data-y={col_i}
+            border={getBorders(row, row_i, cell, col_i)}
+          >
+            {row_i === playerY && col_i === playerX ? <GiSwordman /> : null}
+          </GameSquare>
+        ))
       )
 
     const getColumns = maze => maze[0].length
