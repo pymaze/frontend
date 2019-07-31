@@ -1,24 +1,3 @@
-// import React from "react"
-// import { Link } from "gatsby"
-
-// import Layout from "../components/layout"
-// import Image from "../components/image"
-// import SEO from "../components/seo"
-
-// const IndexPage = () => (
-//   <Layout>
-//     <SEO title="Home" />
-//     <h1>Hi people</h1>
-//     <p>Welcome to your new Gatsby site.</p>
-//     <p>Now go build something great.</p>
-//     <div style={{ maxWidth: `300px`, marginBottom: `1.45rem` }}>
-//       <Image />
-//     </div>
-//     <Link to="/game/">Go to Game!</Link>
-//   </Layout>
-// )
-
-// export default IndexPage
 import React from "react"
 import { Link } from "gatsby"
 import { navigate } from "gatsby"
@@ -26,10 +5,11 @@ import { handleLogin, isLoggedIn } from "../services/auth"
 
 import Layout from "../components/layout"
 
-class IndexPage extends React.Component {
+class Signup extends React.Component {
   state = {
     username: ``,
-    password: ``,
+    password1: ``,
+    password2: ``,
   }
 
   handleUpdate = event => {
@@ -66,17 +46,25 @@ class IndexPage extends React.Component {
             Password
             <input
               type="password"
-              name="password"
+              name="password1"
+              onChange={this.handleUpdate}
+            />
+          </label>
+          <label>
+            Password
+            <input
+              type="password"
+              name="password2"
               onChange={this.handleUpdate}
             />
           </label>
           <input type="submit" value="Log In" />
         </form>
         <p>
-          Don't have an account yet? <Link to="/signup">SignUp</Link>
+          Already have an account? <Link to="/">Login</Link>
         </p>
       </Layout>
     )
   }
 }
-export default IndexPage
+export default Signup

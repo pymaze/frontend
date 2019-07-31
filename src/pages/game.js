@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import { Link } from "gatsby"
 import axios from "axios"
 
-import { GiSwordman } from "react-icons/gi";
+import { GiSwordman } from "react-icons/gi"
 import Layout from "../components/layout"
 import SEO from "../components/seo"
 // import { backendURL } from "../../gatsby-config"
@@ -14,31 +14,54 @@ class SecondPage extends Component {
     playerX: 0,
     playerY: 0,
     error_msg: "",
-    name: "",           // *** Name of the logged-in player
-    title: "",          // *** Title of the current room
-    description: "",    // *** Description of the current room
-    players: [],        // *** Players in the current room
+    name: "", // *** Name of the logged-in player
+    title: "", // *** Title of the current room
+    description: "", // *** Description of the current room
+    players: [], // *** Players in the current room
     maze: [
-      [{ "n": false, "e": false, "s": true, "w": false }, { "n": false, "e": true, "s": false, "w": false }, { "n": false, "e": false, "s": true, "w": true }, { "n": false, "e": false, "s": false, "w": false }],
-      [{ "n": true, "e": true, "s": false, "w": false }, { "n": false, "e": false, "s": true, "w": true }, { "n": true, "e": true, "s": false, "w": false }, { "n": false, "e": false, "s": false, "w": true }],
-      [{ "n": false, "e": false, "s": true, "w": false }, { "n": true, "e": false, "s": true, "w": false }, { "n": false, "e": false, "s": false, "w": false }, { "n": false, "e": false, "s": false, "w": false }],
-      [{ "n": true, "e": true, "s": false, "w": false }, { "n": true, "e": false, "s": false, "w": true }, { "n": false, "e": true, "s": true, "w": false }, { "n": false, "e": false, "s": false, "w": true }]
+      [
+        { n: false, e: false, s: true, w: false },
+        { n: false, e: true, s: false, w: false },
+        { n: false, e: false, s: true, w: true },
+        { n: false, e: false, s: false, w: false },
+      ],
+      [
+        { n: true, e: true, s: false, w: false },
+        { n: false, e: false, s: true, w: true },
+        { n: true, e: true, s: false, w: false },
+        { n: false, e: false, s: false, w: true },
+      ],
+      [
+        { n: false, e: false, s: true, w: false },
+        { n: true, e: false, s: true, w: false },
+        { n: false, e: false, s: false, w: false },
+        { n: false, e: false, s: false, w: false },
+      ],
+      [
+        { n: true, e: true, s: false, w: false },
+        { n: true, e: false, s: false, w: true },
+        { n: false, e: true, s: true, w: false },
+        { n: false, e: false, s: false, w: true },
+      ],
     ],
-    backendURL: "https://build-week-civil-disobedients.herokuapp.com"
+    backendURL: "https://build-week-civil-disobedients.herokuapp.com",
   }
 
   componentDidMount() {
-    document.addEventListener("keydown", this.keyPressed, false);
-    this.getRooms();
+    document.addEventListener("keydown", this.keyPressed, false)
+    this.getRooms()
   }
 
   componentWillUnmount() {
-    document.removeEventListener("keydown", this.keyPressed, false);
+    document.removeEventListener("keydown", this.keyPressed, false)
   }
 
   getRooms = () => {
-      axios.get(`${this.state.backendURL}/api/rooms`, { headers: { "Access-Control-Allow-Origin": "*" } })
-    // axios.get(`${this.state.backendURL}/api/rooms`, { headers: { "Authorization": "Bearer " + "6493c3550c33600a9445e035f5a06a5648bbc3ce"} })
+    axios
+      .get(`${this.state.backendURL}/api/rooms`, {
+        headers: { "Access-Control-Allow-Origin": "*" },
+      })
+      // axios.get(`${this.state.backendURL}/api/rooms`, { headers: { "Authorization": "Bearer " + "6493c3550c33600a9445e035f5a06a5648bbc3ce"} })
       .then(res => {
         console.log(res.data)
         // this.setState({ maze: res.data.rooms });
@@ -49,10 +72,15 @@ class SecondPage extends Component {
   }
 
   initialize = () => {
-    axios.get(`${this.state.backendURL}/api/adv/init`, { headers: { "Authorization": "Bearer 6493c3550c33600a9445e035f5a06a5648bbc3ce"} })
+    axios
+      .get(`${this.state.backendURL}/api/adv/init`, {
+        headers: {
+          Authorization: "Bearer 6493c3550c33600a9445e035f5a06a5648bbc3ce",
+        },
+      })
       .then(res => {
-        const { uuid, ...newState} = res.data;
-        this.setState(newState);
+        const { uuid, ...newState } = res.data
+        this.setState(newState)
       })
       .catch(err => {
         console.log(err)
@@ -71,54 +99,66 @@ class SecondPage extends Component {
     //   .catch(err => {
     //     console.log(err)
     //   })
-    switch(direction) {
+    switch (direction) {
       case "n":
-        if (this.state.playerY > 0 && !this.state.maze[this.state.playerY][this.state.playerX].n) {
+        if (
+          this.state.playerY > 0 &&
+          !this.state.maze[this.state.playerY][this.state.playerX].n
+        ) {
           this.setState({ playerY: this.state.playerY - 1 })
         }
-        break;
+        break
       case "e":
-        if (this.state.playerX < this.state.maze[0].length - 1 && !this.state.maze[this.state.playerY][this.state.playerX].e) {
+        if (
+          this.state.playerX < this.state.maze[0].length - 1 &&
+          !this.state.maze[this.state.playerY][this.state.playerX].e
+        ) {
           this.setState({ playerX: this.state.playerX + 1 })
         }
-        break;
+        break
       case "s":
-        if (this.state.playerY < this.state.maze.length - 1 && !this.state.maze[this.state.playerY][this.state.playerX].s) {
+        if (
+          this.state.playerY < this.state.maze.length - 1 &&
+          !this.state.maze[this.state.playerY][this.state.playerX].s
+        ) {
           this.setState({ playerY: this.state.playerY + 1 })
         }
-        break;
+        break
       case "w":
-        if (this.state.playerX > 0 && !this.state.maze[this.state.playerY][this.state.playerX].w) {
+        if (
+          this.state.playerX > 0 &&
+          !this.state.maze[this.state.playerY][this.state.playerX].w
+        ) {
           this.setState({ playerX: this.state.playerX - 1 })
         }
-        break;
+        break
       default:
-        break;
+        break
     }
     console.log(this.state.playerX, this.state.playerY)
   }
 
   keyPressed = e => {
     if (e.key === "ArrowUp" || e.key === "w") {
-      e.preventDefault();
-      this.move("n");
+      e.preventDefault()
+      this.move("n")
     }
     if (e.key === "ArrowDown" || e.key === "s") {
-      e.preventDefault();
-      this.move("s");
+      e.preventDefault()
+      this.move("s")
     }
     if (e.key === "ArrowLeft" || e.key === "a") {
-      e.preventDefault();
-      this.move("w");
+      e.preventDefault()
+      this.move("w")
     }
     if (e.key === "ArrowRight" || e.key === "d") {
-      e.preventDefault();
-      this.move("e");
+      e.preventDefault()
+      this.move("e")
     }
   }
 
   render() {
-    const { playerX, playerY, name, title, description, players } = this.state;
+    const { playerX, playerY, name, title, description, players } = this.state
     return (
       <Layout>
         <script src="https://d3js.org/d3.v3.min.js" charSet="utf-8"></script>
@@ -127,11 +167,33 @@ class SecondPage extends Component {
         <div id="mapBox">
           {this.state.maze.map((row, row_index) => {
             return row.map((cell, column_index) => {
-              const processedClass = `mapCell${cell.n || row_index === 0 ? " north" : ""}${cell.e || column_index === row.length-1 ? " east" : ""}${cell.s || row_index === this.state.maze.length-1 ? " south" : ""}${cell.w || column_index === 0 ? " west" : ""}`
+              const processedClass = `mapCell${
+                cell.n || row_index === 0 ? " north" : ""
+              }${cell.e || column_index === row.length - 1 ? " east" : ""}${
+                cell.s || row_index === this.state.maze.length - 1
+                  ? " south"
+                  : ""
+              }${cell.w || column_index === 0 ? " west" : ""}`
               if (row_index === playerY && column_index === playerX) {
-                return <span key={row_index + column_index} className={processedClass} data-x={row_index} data-y={column_index}><GiSwordman /></span>
+                return (
+                  <span
+                    key={row_index + column_index}
+                    className={processedClass}
+                    data-x={row_index}
+                    data-y={column_index}
+                  >
+                    <GiSwordman />
+                  </span>
+                )
               }
-              return <span key={row_index + column_index} className={processedClass} data-x={row_index} data-y={column_index} />
+              return (
+                <span
+                  key={row_index + column_index}
+                  className={processedClass}
+                  data-x={row_index}
+                  data-y={column_index}
+                />
+              )
             })
           })}
         </div>
@@ -141,10 +203,12 @@ class SecondPage extends Component {
           <p>{description}</p>
           <p>
             Players:
-            {players.map(p => <span key={p}>{" " + p}</span>)}
+            {players.map(p => (
+              <span key={p}>{" " + p}</span>
+            ))}
           </p>
         </div>
-        <Link to="/">Go back to the homepage</Link>
+        {/* <Link to="/">Go back to the homepage</Link> */}
       </Layout>
     )
   }
