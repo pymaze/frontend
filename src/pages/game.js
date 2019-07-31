@@ -1,5 +1,5 @@
 import React, { Component } from "react"
-import { Link } from "gatsby"
+// import { Link } from "gatsby"
 import axios from "axios"
 
 import { GiSwordman } from "react-icons/gi"
@@ -8,6 +8,7 @@ import SEO from "../components/seo"
 // import { backendURL } from "../../gatsby-config"
 
 import "./game.css"
+import { isLoggedIn } from "../services/auth"
 
 class SecondPage extends Component {
   state = {
@@ -50,6 +51,7 @@ class SecondPage extends Component {
   componentDidMount() {
     document.addEventListener("keydown", this.keyPressed, false)
     this.getRooms()
+    isLoggedIn()
   }
 
   componentWillUnmount() {

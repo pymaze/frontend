@@ -1,32 +1,12 @@
-// import React from "react"
-// import { Link } from "gatsby"
-
-// import Layout from "../components/layout"
-// import Image from "../components/image"
-// import SEO from "../components/seo"
-
-// const IndexPage = () => (
-//   <Layout>
-//     <SEO title="Home" />
-//     <h1>Hi people</h1>
-//     <p>Welcome to your new Gatsby site.</p>
-//     <p>Now go build something great.</p>
-//     <div style={{ maxWidth: `300px`, marginBottom: `1.45rem` }}>
-//       <Image />
-//     </div>
-//     <Link to="/game/">Go to Game!</Link>
-//   </Layout>
-// )
-
-// export default IndexPage
-import React from "react"
+import React, { Component } from "react"
+import Axios from "axios"
 import { Link } from "gatsby"
 import { navigate } from "gatsby"
-import { handleLogin, isLoggedIn } from "../services/auth"
+import { isLoggedIn } from "../services/auth"
 
 import Layout from "../components/layout"
 
-class IndexPage extends React.Component {
+class IndexPage extends Component {
   state = {
     username: ``,
     password: ``,
@@ -40,11 +20,28 @@ class IndexPage extends React.Component {
 
   handleSubmit = event => {
     event.preventDefault()
-    handleLogin(this.state)
+    let data = {
+      user: {
+        username: this.state.username,
+        password: this.state.password,
+      },
+    }
+    Axios.post(
+      "https://build-week-civil-disobedients.herokuapp.com/auth/users/login/",
+      data
+    )
+      .then(res => {
+        window.localStorage.setItem("py-maze-jwt", res.data.user.token)
+        navigate("/game")
+      })
+      .catch(err => {
+        this.setState({ isLoading: false })
+        console.log(err)
+      })
   }
 
   render() {
-    if (isLoggedIn()) {
+    if (isLoggedIn() !== false) {
       navigate(`/game/`)
     }
 
@@ -55,7 +52,6 @@ class IndexPage extends React.Component {
           method="post"
           onSubmit={event => {
             this.handleSubmit(event)
-            navigate(`/game/`)
           }}
         >
           <label>
@@ -73,7 +69,7 @@ class IndexPage extends React.Component {
           <input type="submit" value="Log In" />
         </form>
         <p>
-          Don't have an account yet? <Link to="/signup">SignUp</Link>
+          Don't have an account yet? <Link to="/signup">Sign Up</Link>
         </p>
       </Layout>
     )
