@@ -1,14 +1,87 @@
 import React, { Component } from "react"
 // import { Link } from "gatsby"
-import axios from "axios"
-
 import { GiSwordman } from "react-icons/gi"
+import axios from "axios"
+import {
+  faChevronUp,
+  faChevronDown,
+  faChevronLeft,
+  faChevronRight,
+} from "@fortawesome/free-solid-svg-icons"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import Layout from "../components/layout"
 import SEO from "../components/seo"
-// import { backendURL } from "../../gatsby-config"
-
-import "./game.css"
 import { isLoggedIn } from "../services/auth"
+import styled from "styled-components"
+
+const GameWrapper = styled.div`
+  max-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1em;
+`
+
+const GameControls = styled.div`
+  width: 20em;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat() (3, 1fr);
+  grid-template-rows: repeat(2, 3em);
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+  align-content: center;
+  .control {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: 1px solid brown;
+  }
+  .control:first-child {
+    grid-area: 1 / 1 / 3 / 2;
+  }
+  .control:nth-child(2) {
+    grid-area: 1 / 2 / 2 / 3;
+  }
+
+  .control:nth-child(3) {
+    grid-area: 2 / 2 / 3 / 3;
+  }
+
+  .control:last-child {
+    grid-area: 1 / 3 / 3 / 4;
+  }
+`
+
+const GameSquare = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-style: solid;
+  border-width: 0px;
+  border-color: #f7f7f7;
+  height: ${props => `calc(100% / ${props.rows}em)`};
+  .player {
+    height: 100%;
+    font-size: 4em;
+    fill: #f7f7f7;
+  }
+
+  border-top-width: ${({ border }) => (border.top ? `1px` : "0px")};
+  border-right-width: ${({ border }) => (border.right ? `1px` : "0px")};
+  border-bottom-width: ${({ border }) => (border.bottom ? `1px` : "0px")};
+  border-left-width: ${({ border }) => (border.left ? `1px` : "0px")};
+`
+
+const GameBox = styled.div`
+  height: 60vh;
+  display: grid;
+  grid-template-columns: ${props => `repeat(${props.columns}, 1fr)`};
+  grid-auto-rows: ${props => `calc(100% / ${props.columns})`};
+  background: #1a1e28;
+`
 
 class SecondPage extends Component {
   state = {
@@ -63,44 +136,30 @@ class SecondPage extends Component {
       .get(`${this.state.backendURL}/api/rooms`, {
         headers: { "Access-Control-Allow-Origin": "*" },
       })
-      // axios.get(`${this.state.backendURL}/api/rooms`, { headers: { "Authorization": "Bearer " + "6493c3550c33600a9445e035f5a06a5648bbc3ce"} })
       .then(res => {
         console.log(res.data)
-        // this.setState({ maze: res.data.rooms });
       })
       .catch(err => {
         console.log(err)
       })
   }
 
-  initialize = () => {
-    axios
-      .get(`${this.state.backendURL}/api/adv/init`, {
-        headers: {
-          Authorization: "Bearer 6493c3550c33600a9445e035f5a06a5648bbc3ce",
-        },
-      })
-      .then(res => {
-        const { uuid, ...newState } = res.data
-        this.setState(newState)
-      })
-      .catch(err => {
-        console.log(err)
-      })
-  }
+  // initialize = () =>
+  //   axios
+  //     .get(`${this.state.backendURL}/api/adv/init`, {
+  //       headers: {
+  //         Authorization: "Bearer 6493c3550c33600a9445e035f5a06a5648bbc3ce",
+  //       },
+  //     })
+  //     .then(res => {
+  //       const { uuid, ...newState } = res.data
+  //       this.setState(newState)
+  //     })
+  //     .catch(err => {
+  //       console.log(err)
+  //     })
 
   move = direction => {
-    // axios.post("https://lambda-mud-test.herokuapp.com/api/adv/move", { direction: direction}, { headers: { "Authorization": "Bearer 6493c3550c33600a9445e035f5a06a5648bbc3ce"} })
-    //   .then(res => {
-    //     if (res.data.error_msg.length > 0) {
-    //       console.log(res.data.error_msg)
-    //     } else {
-    //       this.setState(res.data);
-    //     }
-    //   })
-    //   .catch(err => {
-    //     console.log(err)
-    //   })
     switch (direction) {
       case "n":
         if (
@@ -141,64 +200,76 @@ class SecondPage extends Component {
   }
 
   keyPressed = e => {
+    e.preventDefault()
     if (e.key === "ArrowUp" || e.key === "w") {
-      e.preventDefault()
       this.move("n")
     }
     if (e.key === "ArrowDown" || e.key === "s") {
-      e.preventDefault()
       this.move("s")
     }
     if (e.key === "ArrowLeft" || e.key === "a") {
-      e.preventDefault()
       this.move("w")
     }
     if (e.key === "ArrowRight" || e.key === "d") {
-      e.preventDefault()
       this.move("e")
     }
   }
 
   render() {
     const { playerX, playerY, name, title, description, players } = this.state
+
+    const getBorders = (row, row_i, cell, col_i) => ({
+      top: cell.n || row_i === 0,
+      right: cell.e || col_i === row.length - 1,
+      bottom: cell.s || row_i === this.state.maze.length - 1,
+      left: cell.w || col_i === 0,
+    })
+
+    const GameRows = () =>
+      this.state.maze.map((row, row_i) =>
+        row.map((cell, col_i) => (
+          <GameSquare
+            key={row_i + col_i}
+            data-x={row_i}
+            data-y={col_i}
+            border={getBorders(row, row_i, cell, col_i)}
+          >
+            {row_i === playerY && col_i === playerX ? (
+              <GiSwordman className="player" />
+            ) : null}
+          </GameSquare>
+        ))
+      )
+
+    const getColumns = maze => maze[0].length
+    const getRows = maze => maze.length
+
     return (
       <Layout>
-        <script src="https://d3js.org/d3.v3.min.js" charSet="utf-8"></script>
         <SEO title="The Maze" />
-        <h1>Hi from the second page</h1>
-        <div id="mapBox">
-          {this.state.maze.map((row, row_index) => {
-            return row.map((cell, column_index) => {
-              const processedClass = `mapCell${
-                cell.n || row_index === 0 ? " north" : ""
-              }${cell.e || column_index === row.length - 1 ? " east" : ""}${
-                cell.s || row_index === this.state.maze.length - 1
-                  ? " south"
-                  : ""
-              }${cell.w || column_index === 0 ? " west" : ""}`
-              if (row_index === playerY && column_index === playerX) {
-                return (
-                  <span
-                    key={row_index + column_index}
-                    className={processedClass}
-                    data-x={row_index}
-                    data-y={column_index}
-                  >
-                    <GiSwordman />
-                  </span>
-                )
-              }
-              return (
-                <span
-                  key={row_index + column_index}
-                  className={processedClass}
-                  data-x={row_index}
-                  data-y={column_index}
-                />
-              )
-            })
-          })}
-        </div>
+        <h1>The Maze</h1>
+        <GameWrapper>
+          <GameBox
+            columns={getColumns(this.state.maze)}
+            rows={getRows(this.state.maze)}
+          >
+            <GameRows />
+          </GameBox>
+          <GameControls>
+            <div className="control" onClick={() => this.move("w")}>
+              <FontAwesomeIcon icon={faChevronLeft} size="2x" />
+            </div>
+            <div className="control" onClick={() => this.move("n")}>
+              <FontAwesomeIcon icon={faChevronUp} size="2x" />
+            </div>
+            <div className="control" onClick={() => this.move("s")}>
+              <FontAwesomeIcon icon={faChevronDown} size="2x" />
+            </div>
+            <div className="control" onClick={() => this.move("e")}>
+              <FontAwesomeIcon icon={faChevronRight} size="2x" />
+            </div>
+          </GameControls>
+        </GameWrapper>
         <div>
           <h2>{name}</h2>
           <p>{title}</p>
