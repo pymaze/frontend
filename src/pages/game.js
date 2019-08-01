@@ -132,32 +132,18 @@ class SecondPage extends Component {
   }
 
   getRooms = () => {
+    const token = localStorage.getItem("py-maze-jwt")
     axios
-      .get(`${this.state.backendURL}/api/rooms`, {
-        headers: { "Access-Control-Allow-Origin": "*" },
+      .get(`${this.state.backendURL}/api/rooms/`, {
+        headers: { "Authorization": token },
       })
       .then(res => {
-        console.log(res.data)
+        this.setState({ maze: res.data })
       })
       .catch(err => {
         console.log(err)
       })
   }
-
-  // initialize = () =>
-  //   axios
-  //     .get(`${this.state.backendURL}/api/adv/init`, {
-  //       headers: {
-  //         Authorization: "Bearer 6493c3550c33600a9445e035f5a06a5648bbc3ce",
-  //       },
-  //     })
-  //     .then(res => {
-  //       const { uuid, ...newState } = res.data
-  //       this.setState(newState)
-  //     })
-  //     .catch(err => {
-  //       console.log(err)
-  //     })
 
   move = direction => {
     switch (direction) {
@@ -196,7 +182,6 @@ class SecondPage extends Component {
       default:
         break
     }
-    console.log(this.state.playerX, this.state.playerY)
   }
 
   keyPressed = e => {
