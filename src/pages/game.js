@@ -2,6 +2,7 @@ import React, { Component } from "react"
 // import { Link } from "gatsby"
 import { GiSwordman } from "react-icons/gi"
 import axios from "axios"
+import jwtDecode from "jwt-decode"
 import {
   faChevronUp,
   faChevronDown,
@@ -145,13 +146,39 @@ class SecondPage extends Component {
       })
   }
 
+  playerPut = (name, title, token) => {
+    console.log("player putting")
+    axios
+      .put(`${this.state.backendURL}/auth/users/move/`, {
+        "user": {
+          "username": name,
+          "current_room": title
+        }
+      },
+      {
+        headers: {
+          "Authorization": token,
+        }
+      })
+      .then(res => {
+        console.log("put succeeded", res.data)
+      })
+      .catch(err => {
+        console.log(err)
+      })
+  }
+
   move = direction => {
+    console.log("moving", direction)
+    const token = localStorage.getItem("py-maze-jwt")
+    const decoded = jwtDecode(token)
     switch (direction) {
       case "n":
         if (
           this.state.playerY > 0 &&
           !this.state.maze[this.state.playerY][this.state.playerX].n
         ) {
+          this.playerPut(decoded.id, "Current Room", token)
           this.setState({ playerY: this.state.playerY - 1 })
         }
         break
@@ -160,6 +187,7 @@ class SecondPage extends Component {
           this.state.playerX < this.state.maze[0].length - 1 &&
           !this.state.maze[this.state.playerY][this.state.playerX].e
         ) {
+          this.playerPut(decoded.id, "Current Room", token)
           this.setState({ playerX: this.state.playerX + 1 })
         }
         break
@@ -168,6 +196,7 @@ class SecondPage extends Component {
           this.state.playerY < this.state.maze.length - 1 &&
           !this.state.maze[this.state.playerY][this.state.playerX].s
         ) {
+          this.playerPut(decoded.id, "Current Room", token)
           this.setState({ playerY: this.state.playerY + 1 })
         }
         break
@@ -176,6 +205,7 @@ class SecondPage extends Component {
           this.state.playerX > 0 &&
           !this.state.maze[this.state.playerY][this.state.playerX].w
         ) {
+          this.playerPut(decoded.id, "Current Room", token)
           this.setState({ playerX: this.state.playerX - 1 })
         }
         break
