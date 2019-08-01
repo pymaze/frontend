@@ -2,23 +2,73 @@ import React, { Component } from "react"
 import { Link } from "gatsby"
 import { GiSwordman } from "react-icons/gi"
 import axios from "axios"
-
+import {
+  faChevronUp,
+  faChevronDown,
+  faChevronLeft,
+  faChevronRight,
+} from "@fortawesome/free-solid-svg-icons"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import Layout from "../components/layout"
 import SEO from "../components/seo"
 
-import styled from "styled-components"
+import styled, { css } from "styled-components"
 
 const GameWrapper = styled.div`
   max-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1em;
+`
+
+const GameControls = styled.div`
+  width: 20em;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat() (3, 1fr);
+  grid-template-rows: repeat(2, 3em);
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+  align-content: center;
+  .control {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: 1px solid brown;
+  }
+  .control:first-child {
+    grid-area: 1 / 1 / 3 / 2;
+  }
+  .control:nth-child(2) {
+    grid-area: 1 / 2 / 2 / 3;
+  }
+
+  .control:nth-child(3) {
+    grid-area: 2 / 2 / 3 / 3;
+  }
+
+  .control:last-child {
+    grid-area: 1 / 3 / 3 / 4;
+  }
 `
 
 const GameSquare = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-style: solid;
+  border-width: 0px;
+  border-color: #f7f7f7;
   height: ${props => `calc(100% / ${props.rows}em)`};
-  border-color: black;
+  .player {
+    height: 100%;
+    font-size: 4em;
+    fill: #f7f7f7;
+  }
+
   border-top-width: ${({ border }) => (border.top ? `1px` : "0px")};
   border-right-width: ${({ border }) => (border.right ? `1px` : "0px")};
   border-bottom-width: ${({ border }) => (border.bottom ? `1px` : "0px")};
@@ -26,12 +76,11 @@ const GameSquare = styled.div`
 `
 
 const GameBox = styled.div`
+  height: 60vh;
   display: grid;
   grid-template-columns: ${props => `repeat(${props.columns}, 1fr)`};
-  grid-auto-rows: 10em;
-  ${GameSquare} {
-    height: 100%;
-  }
+  grid-auto-rows: ${props => `calc(100% / ${props.columns})`};
+  background: #1a1e28;
 `
 
 class SecondPage extends Component {
@@ -94,7 +143,7 @@ class SecondPage extends Component {
       })
   }
 
-  initialize = () => {
+  initialize = () =>
     axios
       .get(`${this.state.backendURL}/api/adv/init`, {
         headers: {
@@ -108,7 +157,6 @@ class SecondPage extends Component {
       .catch(err => {
         console.log(err)
       })
-  }
 
   move = direction => {
     switch (direction) {
@@ -151,20 +199,17 @@ class SecondPage extends Component {
   }
 
   keyPressed = e => {
+    e.preventDefault()
     if (e.key === "ArrowUp" || e.key === "w") {
-      e.preventDefault()
       this.move("n")
     }
     if (e.key === "ArrowDown" || e.key === "s") {
-      e.preventDefault()
       this.move("s")
     }
     if (e.key === "ArrowLeft" || e.key === "a") {
-      e.preventDefault()
       this.move("w")
     }
     if (e.key === "ArrowRight" || e.key === "d") {
-      e.preventDefault()
       this.move("e")
     }
   }
@@ -188,7 +233,9 @@ class SecondPage extends Component {
             data-y={col_i}
             border={getBorders(row, row_i, cell, col_i)}
           >
-            {row_i === playerY && col_i === playerX ? <GiSwordman /> : null}
+            {row_i === playerY && col_i === playerX ? (
+              <GiSwordman className="player" />
+            ) : null}
           </GameSquare>
         ))
       )
@@ -208,6 +255,20 @@ class SecondPage extends Component {
           >
             <GameRows />
           </GameBox>
+          <GameControls>
+            <div className="control" onClick={() => this.move("w")}>
+              <FontAwesomeIcon icon={faChevronLeft} size="2x" />
+            </div>
+            <div className="control" onClick={() => this.move("n")}>
+              <FontAwesomeIcon icon={faChevronUp} size="2x" />
+            </div>
+            <div className="control" onClick={() => this.move("s")}>
+              <FontAwesomeIcon icon={faChevronDown} size="2x" />
+            </div>
+            <div className="control" onClick={() => this.move("e")}>
+              <FontAwesomeIcon icon={faChevronRight} size="2x" />
+            </div>
+          </GameControls>
         </GameWrapper>
         <div>
           <h2>{name}</h2>
