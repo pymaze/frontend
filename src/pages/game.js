@@ -146,6 +146,7 @@ class SecondPage extends Component {
         if (this.state.error_msg) {
           this.setState({ error_msg: "" })
         }
+        this.setState({ players: res.data.players })
       })
       .catch(err => {
         console.log(err)
@@ -223,6 +224,7 @@ class SecondPage extends Component {
     })
 
     const GameRows = () =>
+      maze.length &&
       maze.map((row, row_i) =>
         row.map((cell, col_i) => (
           <GameSquare
