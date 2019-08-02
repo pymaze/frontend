@@ -95,28 +95,140 @@ class SecondPage extends Component {
     players: [], // *** Players in the current room
     maze: [
       [
-        { n: false, e: false, s: true, w: false },
-        { n: false, e: true, s: false, w: false },
-        { n: false, e: false, s: true, w: true },
-        { n: false, e: false, s: false, w: false },
+        {
+          n: false,
+          e: false,
+          s: true,
+          w: false,
+          title: "start",
+          description: "room start",
+        },
+        {
+          n: false,
+          e: true,
+          s: false,
+          w: false,
+          title: "0 1",
+          description: "room 0 1",
+        },
+        {
+          n: false,
+          e: false,
+          s: true,
+          w: true,
+          title: "0 2",
+          description: "room 0 2",
+        },
+        {
+          n: false,
+          e: false,
+          s: false,
+          w: false,
+          title: "0 3",
+          description: "room 0 3",
+        },
       ],
       [
-        { n: true, e: true, s: false, w: false },
-        { n: false, e: false, s: true, w: true },
-        { n: true, e: true, s: false, w: false },
-        { n: false, e: false, s: false, w: true },
+        {
+          n: true,
+          e: true,
+          s: false,
+          w: false,
+          title: "1 0",
+          description: "room 1 0",
+        },
+        {
+          n: false,
+          e: false,
+          s: true,
+          w: true,
+          title: "1 1",
+          description: "room 1 1",
+        },
+        {
+          n: true,
+          e: true,
+          s: false,
+          w: false,
+          title: "1 2",
+          description: "room 1 2",
+        },
+        {
+          n: false,
+          e: false,
+          s: false,
+          w: true,
+          title: "1 3",
+          description: "room 1 3",
+        },
       ],
       [
-        { n: false, e: false, s: true, w: false },
-        { n: true, e: false, s: true, w: false },
-        { n: false, e: false, s: false, w: false },
-        { n: false, e: false, s: false, w: false },
+        {
+          n: false,
+          e: false,
+          s: true,
+          w: false,
+          title: "2 0",
+          description: "room 2 0",
+        },
+        {
+          n: true,
+          e: false,
+          s: true,
+          w: false,
+          title: "2 1",
+          description: "room 2 1",
+        },
+        {
+          n: false,
+          e: false,
+          s: false,
+          w: false,
+          title: "2 2",
+          description: "room 2 2",
+        },
+        {
+          n: false,
+          e: false,
+          s: false,
+          w: false,
+          title: "2 3",
+          description: "room 2 3",
+        },
       ],
       [
-        { n: true, e: true, s: false, w: false },
-        { n: true, e: false, s: false, w: true },
-        { n: false, e: true, s: true, w: false },
-        { n: false, e: false, s: false, w: true },
+        {
+          n: true,
+          e: true,
+          s: false,
+          w: false,
+          title: "3 0",
+          description: "room 3 0",
+        },
+        {
+          n: true,
+          e: false,
+          s: false,
+          w: true,
+          title: "3 1",
+          description: "room 3 1",
+        },
+        {
+          n: false,
+          e: true,
+          s: true,
+          w: false,
+          title: "3 2",
+          description: "room 3 2",
+        },
+        {
+          n: false,
+          e: false,
+          s: false,
+          w: true,
+          title: "3 3",
+          description: "room 3 3",
+        },
       ],
     ],
     backendURL: "https://build-week-civil-disobedients.herokuapp.com",
@@ -124,7 +236,7 @@ class SecondPage extends Component {
 
   componentDidMount() {
     document.addEventListener("keydown", this.keyPressed, false)
-    this.getRooms()
+    // this.getRooms()
     isLoggedIn()
   }
 
@@ -136,7 +248,7 @@ class SecondPage extends Component {
     const token = localStorage.getItem("py-maze-jwt")
     axios
       .get(`${this.state.backendURL}/api/rooms/`, {
-        headers: { "Authorization": token },
+        headers: { Authorization: token },
       })
       .then(res => {
         this.setState({ maze: res.data })
@@ -148,18 +260,25 @@ class SecondPage extends Component {
 
   playerPut = (name, title, token) => {
     console.log("player putting")
+    console.log(
+      "next: ",
+      this.state.maze[this.state.playerY][this.state.playerX].title
+    )
     axios
-      .put(`${this.state.backendURL}/auth/users/move/`, {
-        "user": {
-          "username": name,
-          "current_room": title
+      .put(
+        `${this.state.backendURL}/auth/users/move/`,
+        {
+          user: {
+            username: name,
+            current_room: title,
+          },
+        },
+        {
+          headers: {
+            Authorization: token,
+          },
         }
-      },
-      {
-        headers: {
-          "Authorization": token,
-        }
-      })
+      )
       .then(res => {
         console.log("put succeeded", res.data)
       })
@@ -167,6 +286,8 @@ class SecondPage extends Component {
         console.log(err)
       })
   }
+
+  currentRoom = () => this.state.maze[this.state.playerY][this.state.playerX]
 
   move = direction => {
     console.log("moving", direction)
@@ -178,8 +299,8 @@ class SecondPage extends Component {
           this.state.playerY > 0 &&
           !this.state.maze[this.state.playerY][this.state.playerX].n
         ) {
-          this.playerPut(decoded.id, "Current Room", token)
           this.setState({ playerY: this.state.playerY - 1 })
+          this.playerPut(decoded.id, this.currentRoom().title, token)
         }
         break
       case "e":
@@ -187,8 +308,8 @@ class SecondPage extends Component {
           this.state.playerX < this.state.maze[0].length - 1 &&
           !this.state.maze[this.state.playerY][this.state.playerX].e
         ) {
-          this.playerPut(decoded.id, "Current Room", token)
           this.setState({ playerX: this.state.playerX + 1 })
+          this.playerPut(decoded.id, this.currentRoom().title, token)
         }
         break
       case "s":
@@ -196,8 +317,8 @@ class SecondPage extends Component {
           this.state.playerY < this.state.maze.length - 1 &&
           !this.state.maze[this.state.playerY][this.state.playerX].s
         ) {
-          this.playerPut(decoded.id, "Current Room", token)
           this.setState({ playerY: this.state.playerY + 1 })
+          this.playerPut(decoded.id, this.currentRoom().title, token)
         }
         break
       case "w":
@@ -205,8 +326,8 @@ class SecondPage extends Component {
           this.state.playerX > 0 &&
           !this.state.maze[this.state.playerY][this.state.playerX].w
         ) {
-          this.playerPut(decoded.id, "Current Room", token)
           this.setState({ playerX: this.state.playerX - 1 })
+          this.playerPut(decoded.id, this.currentRoom().title, token)
         }
         break
       default:
@@ -258,7 +379,6 @@ class SecondPage extends Component {
 
     const getColumns = maze => maze[0].length
     const getRows = maze => maze.length
-
     return (
       <Layout>
         <SEO title="The Maze" />
@@ -287,8 +407,8 @@ class SecondPage extends Component {
         </GameWrapper>
         <div>
           <h2>{name}</h2>
-          <p>{title}</p>
-          <p>{description}</p>
+          <p>You are currently in {this.currentRoom().title}</p>
+          <p>{this.currentRoom().description}</p>
           <p>
             Players:
             {players.map(p => (
