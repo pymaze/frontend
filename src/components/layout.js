@@ -25,7 +25,10 @@ const Layout = ({ children }) => {
 
   return (
     <div className="layout-body">
-      <Header siteTitle={data.site.siteMetadata.title} />
+      <Header
+        className="header-title"
+        siteTitle={data.site.siteMetadata.title}
+      />
       <div
         style={{
           margin: `0 auto`,

@@ -840,6 +840,10 @@ input::before {
   outline: none;
 }
 
+.header-title {
+  margin-left: -63%;
+}
+
 @media only screen and (max-width: 480px) {
   html {
     font-size: 100%;
