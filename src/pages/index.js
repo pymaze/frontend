@@ -2,7 +2,7 @@ import React, { Component } from "react"
 // import { Link } from "gatsby"
 import { navigate } from "gatsby"
 import { isLoggedIn } from "../services/auth"
-import MazeMan from "../images/MazeMan.jpg"
+import MazeMan from "../images/MazeMan.png"
 
 import Layout from "../components/layout"
 
