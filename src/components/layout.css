@@ -218,7 +218,7 @@ img {
   padding-left: 0;
   padding-right: 0;
   padding-top: 0;
-  margin-bottom: 1.45rem;
+  /* margin-bottom: 1.45rem; */
 }
 h1 {
   margin-left: 0;
@@ -842,6 +842,31 @@ input::before {
 
 .header-title {
   margin-left: -63%;
+}
+
+.background-logo {
+  transform: rotate(20deg);
+  z-index: 0;
+  opacity: 0.45;
+  margin-top: 13%;
+}
+
+.header-logo {
+  max-height: 3rem;
+  margin-right: 21px;
+  margin-bottom: -9px;
+}
+
+.splash {
+  margin: -817px auto 0;
+  color: rebeccapurple;
+  z-index: 1;
+  max-width: 600px;
+  font-weight: 600;
+}
+
+.splash-body {
+  z-index: 1;
 }
 
 @media only screen and (max-width: 480px) {

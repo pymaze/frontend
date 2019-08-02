@@ -3,6 +3,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { navigate } from "gatsby"
 import { isLoggedIn, logout } from "../services/auth"
+import Maze from "../images/maze.png"
 
 const Header = ({ siteTitle }) => (
   <header
@@ -21,14 +22,16 @@ const Header = ({ siteTitle }) => (
       }}
     >
       <h1 style={{ margin: 0 }}>
+        <img src={Maze} alt="maze-logo" className="header-logo" />
         <Link
           to="/"
           style={{
             color: `white`,
             textDecoration: `none`,
+            fontFamily: ``,
           }}
         >
-          {siteTitle}
+          PyMaze
         </Link>
       </h1>
       {isLoggedIn() ? (
@@ -50,7 +53,26 @@ const Header = ({ siteTitle }) => (
         >
           Logout
         </a>
-      ) : null}
+      ) : (
+        <a
+          style={{
+            color: "rebeccapurple",
+            textDecoration: "none",
+            background: "white",
+            padding: "0 1em",
+            lineHeight: "2.5",
+            fontWeight: "bold",
+            borderRadius: "7px 0",
+          }}
+          href="/"
+          onClick={event => {
+            event.preventDefault()
+            logout(() => navigate(`/app/login`))
+          }}
+        >
+          Login
+        </a>
+      )}
     </div>
   </header>
 )
