@@ -25,7 +25,7 @@ const Layout = ({ children }) => {
   `)
 
   return (
-    <>
+    <div className="layout-body">
       <Header siteTitle={data.site.siteMetadata.title} />
       {isLoggedIn() ? (
         <a
@@ -49,7 +49,7 @@ const Layout = ({ children }) => {
       >
         <main>{children}</main>
       </div>
-    </>
+    </div>
   )
 }
 
