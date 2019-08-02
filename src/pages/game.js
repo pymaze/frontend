@@ -1,7 +1,8 @@
 import React, { Component } from "react"
 // import { Link } from "gatsby"
-import { GiSwordman } from "react-icons/gi"
+import { GiSwordman, GiFlexibleStar } from "react-icons/gi"
 import axios from "axios"
+import jwtDecode from "jwt-decode"
 import {
   faChevronUp,
   faChevronDown,
@@ -19,10 +20,16 @@ const GameWrapper = styled.div`
   display: grid;
   grid-template-columns: 1fr;
   gap: 1em;
+  width: 60%;
+`
+const DisplayWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
 `
 
 const GameControls = styled.div`
   width: 20em;
+  align-self: flex-end;
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat() (3, 1fr);
@@ -89,35 +96,8 @@ class SecondPage extends Component {
     playerY: 0,
     error_msg: "",
     name: "", // *** Name of the logged-in player
-    title: "", // *** Title of the current room
-    description: "", // *** Description of the current room
     players: [], // *** Players in the current room
-    maze: [
-      [
-        { n: false, e: false, s: true, w: false },
-        { n: false, e: true, s: false, w: false },
-        { n: false, e: false, s: true, w: true },
-        { n: false, e: false, s: false, w: false },
-      ],
-      [
-        { n: true, e: true, s: false, w: false },
-        { n: false, e: false, s: true, w: true },
-        { n: true, e: true, s: false, w: false },
-        { n: false, e: false, s: false, w: true },
-      ],
-      [
-        { n: false, e: false, s: true, w: false },
-        { n: true, e: false, s: true, w: false },
-        { n: false, e: false, s: false, w: false },
-        { n: false, e: false, s: false, w: false },
-      ],
-      [
-        { n: true, e: true, s: false, w: false },
-        { n: true, e: false, s: false, w: true },
-        { n: false, e: true, s: true, w: false },
-        { n: false, e: false, s: false, w: true },
-      ],
-    ],
+    maze: [],
     backendURL: "https://build-week-civil-disobedients.herokuapp.com",
   }
 
@@ -133,50 +113,82 @@ class SecondPage extends Component {
 
   getRooms = () => {
     const token = localStorage.getItem("py-maze-jwt")
+    const decoded = jwtDecode(token)
     axios
       .get(`${this.state.backendURL}/api/rooms/`, {
-        headers: { "Authorization": token },
+        headers: { Authorization: token },
       })
       .then(res => {
-        this.setState({ maze: res.data })
+        this.setState({ maze: res.data, name: decoded.id })
       })
       .catch(err => {
         console.log(err)
       })
   }
 
+  playerPut = (name, title, token) => {
+    axios
+      .put(
+        `${this.state.backendURL}/auth/users/move/`,
+        {
+          user: {
+            username: name,
+            current_room: title,
+          },
+        },
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      )
+      .then(res => {
+        if (this.state.error_msg) {
+          this.setState({ error_msg: "" })
+        }
+      })
+      .catch(err => {
+        console.log(err)
+        this.setState({ error_msg: err })
+      })
+  }
+
+  currentRoom = () => this.state.maze[this.state.playerY][this.state.playerX]
+
   move = direction => {
+    const token = localStorage.getItem("py-maze-jwt")
+    const decoded = jwtDecode(token)
     switch (direction) {
       case "n":
-        if (
-          this.state.playerY > 0 &&
-          !this.state.maze[this.state.playerY][this.state.playerX].n
-        ) {
+        if (this.state.playerY > 0 && !this.currentRoom().n) {
           this.setState({ playerY: this.state.playerY - 1 })
+          this.playerPut(decoded.id, this.currentRoom().title, token)
         }
         break
       case "e":
         if (
+          this.state.maze.length &&
           this.state.playerX < this.state.maze[0].length - 1 &&
-          !this.state.maze[this.state.playerY][this.state.playerX].e
+          !this.currentRoom().e
         ) {
           this.setState({ playerX: this.state.playerX + 1 })
+          this.playerPut(decoded.id, this.currentRoom().title, token)
         }
         break
       case "s":
         if (
+          this.state.maze.length &&
           this.state.playerY < this.state.maze.length - 1 &&
-          !this.state.maze[this.state.playerY][this.state.playerX].s
+          !this.currentRoom().s
         ) {
           this.setState({ playerY: this.state.playerY + 1 })
+          this.playerPut(decoded.id, this.currentRoom().title, token)
         }
         break
       case "w":
-        if (
-          this.state.playerX > 0 &&
-          !this.state.maze[this.state.playerY][this.state.playerX].w
-        ) {
+        if (this.state.playerX > 0 && !this.currentRoom().w) {
           this.setState({ playerX: this.state.playerX - 1 })
+          this.playerPut(decoded.id, this.currentRoom().title, token)
         }
         break
       default:
@@ -201,17 +213,17 @@ class SecondPage extends Component {
   }
 
   render() {
-    const { playerX, playerY, name, title, description, players } = this.state
+    const { playerX, playerY, name, maze, players, error_msg } = this.state
 
     const getBorders = (row, row_i, cell, col_i) => ({
       top: cell.n || row_i === 0,
       right: cell.e || col_i === row.length - 1,
-      bottom: cell.s || row_i === this.state.maze.length - 1,
+      bottom: cell.s || row_i === maze.length - 1,
       left: cell.w || col_i === 0,
     })
 
     const GameRows = () =>
-      this.state.maze.map((row, row_i) =>
+      maze.map((row, row_i) =>
         row.map((cell, col_i) => (
           <GameSquare
             key={row_i + col_i}
@@ -226,46 +238,52 @@ class SecondPage extends Component {
         ))
       )
 
-    const getColumns = maze => maze[0].length
-    const getRows = maze => maze.length
-
+    if (!maze.length) return <h1>Loading...</h1>
+    if (error_msg) return <h1>{error_msg}</h1>
     return (
       <Layout>
         <SEO title="The Maze" />
         <h1>The Maze</h1>
-        <GameWrapper>
-          <GameBox
-            columns={getColumns(this.state.maze)}
-            rows={getRows(this.state.maze)}
+        <DisplayWrapper>
+          <GameWrapper>
+            <GameBox columns={maze[0].length} rows={maze.length}>
+              <GameRows />
+            </GameBox>
+          </GameWrapper>
+          <div
+            style={{
+              width: "38%",
+              display: "flex",
+              flexWrap: "wrap",
+            }}
           >
-            <GameRows />
-          </GameBox>
-          <GameControls>
-            <div className="control" onClick={() => this.move("w")}>
-              <FontAwesomeIcon icon={faChevronLeft} size="2x" />
-            </div>
-            <div className="control" onClick={() => this.move("n")}>
-              <FontAwesomeIcon icon={faChevronUp} size="2x" />
-            </div>
-            <div className="control" onClick={() => this.move("s")}>
-              <FontAwesomeIcon icon={faChevronDown} size="2x" />
-            </div>
-            <div className="control" onClick={() => this.move("e")}>
-              <FontAwesomeIcon icon={faChevronRight} size="2x" />
-            </div>
-          </GameControls>
-        </GameWrapper>
-        <div>
-          <h2>{name}</h2>
-          <p>{title}</p>
-          <p>{description}</p>
-          <p>
-            Players:
-            {players.map(p => (
-              <span key={p}>{" " + p}</span>
-            ))}
-          </p>
-        </div>
+            <>
+              <h2>{name}</h2>
+              <h2>Current location: {this.currentRoom().title}</h2>
+              <h4>
+                Players in room: {name} (you)
+                {players.map(p => (
+                  <span key={p}>{", " + p}</span>
+                ))}
+              </h4>
+              <h4>{this.currentRoom().description}</h4>
+            </>
+            <GameControls>
+              <div className="control" onClick={() => this.move("w")}>
+                <FontAwesomeIcon icon={faChevronLeft} size="2x" />
+              </div>
+              <div className="control" onClick={() => this.move("n")}>
+                <FontAwesomeIcon icon={faChevronUp} size="2x" />
+              </div>
+              <div className="control" onClick={() => this.move("s")}>
+                <FontAwesomeIcon icon={faChevronDown} size="2x" />
+              </div>
+              <div className="control" onClick={() => this.move("e")}>
+                <FontAwesomeIcon icon={faChevronRight} size="2x" />
+              </div>
+            </GameControls>
+          </div>
+        </DisplayWrapper>
         {/* <Link to="/">Go back to the homepage</Link> */}
       </Layout>
     )
