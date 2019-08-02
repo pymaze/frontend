@@ -3,7 +3,6 @@ import React, { Component } from "react"
 import { navigate } from "gatsby"
 import { isLoggedIn } from "../services/auth"
 import MazeMan from "../images/MazeMan.jpg"
-import Keys from "../images/Keys.jpg"
 
 import Layout from "../components/layout"
 
