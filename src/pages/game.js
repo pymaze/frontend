@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 // import { Link } from "gatsby"
-import { GiSwordman } from "react-icons/gi"
+import { GiSwordman, GiFlexibleStar } from "react-icons/gi"
 import axios from "axios"
 import jwtDecode from "jwt-decode"
 import {
@@ -29,6 +29,7 @@ const DisplayWrapper = styled.div`
 
 const GameControls = styled.div`
   width: 20em;
+  align-self: flex-end;
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat() (3, 1fr);
@@ -126,7 +127,6 @@ class SecondPage extends Component {
   }
 
   playerPut = (name, title, token) => {
-    console.log("player putting")
     axios
       .put(
         `${this.state.backendURL}/auth/users/move/`,
@@ -143,7 +143,6 @@ class SecondPage extends Component {
         }
       )
       .then(res => {
-        console.log("put succeeded", res.data)
         if (this.state.error_msg) {
           this.setState({ error_msg: "" })
         }
@@ -250,6 +249,25 @@ class SecondPage extends Component {
             <GameBox columns={maze[0].length} rows={maze.length}>
               <GameRows />
             </GameBox>
+          </GameWrapper>
+          <div
+            style={{
+              width: "38%",
+              display: "flex",
+              flexWrap: "wrap",
+            }}
+          >
+            <>
+              <h2>{name}</h2>
+              <h2>Current location: {this.currentRoom().title}</h2>
+              <h4>
+                Players in room: {name} (you)
+                {players.map(p => (
+                  <span key={p}>{", " + p}</span>
+                ))}
+              </h4>
+              <h4>{this.currentRoom().description}</h4>
+            </>
             <GameControls>
               <div className="control" onClick={() => this.move("w")}>
                 <FontAwesomeIcon icon={faChevronLeft} size="2x" />
@@ -264,17 +282,6 @@ class SecondPage extends Component {
                 <FontAwesomeIcon icon={faChevronRight} size="2x" />
               </div>
             </GameControls>
-          </GameWrapper>
-          <div style={{ width: "35%" }}>
-            <h2>{name}</h2>
-            <h2>Current location: {this.currentRoom().title}</h2>
-            <h3>{this.currentRoom().description}</h3>
-            <h4>
-              Players in this room: {name} (you)
-              {players.map(p => (
-                <span key={p}>{", " + p}</span>
-              ))}
-            </h4>
           </div>
         </DisplayWrapper>
         {/* <Link to="/">Go back to the homepage</Link> */}
