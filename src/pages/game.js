@@ -93,150 +93,13 @@ class SecondPage extends Component {
     title: "", // *** Title of the current room
     description: "", // *** Description of the current room
     players: [], // *** Players in the current room
-    maze: [
-      [
-        {
-          n: false,
-          e: false,
-          s: true,
-          w: false,
-          title: "start",
-          description: "room start",
-        },
-        {
-          n: false,
-          e: true,
-          s: false,
-          w: false,
-          title: "0 1",
-          description: "room 0 1",
-        },
-        {
-          n: false,
-          e: false,
-          s: true,
-          w: true,
-          title: "0 2",
-          description: "room 0 2",
-        },
-        {
-          n: false,
-          e: false,
-          s: false,
-          w: false,
-          title: "0 3",
-          description: "room 0 3",
-        },
-      ],
-      [
-        {
-          n: true,
-          e: true,
-          s: false,
-          w: false,
-          title: "1 0",
-          description: "room 1 0",
-        },
-        {
-          n: false,
-          e: false,
-          s: true,
-          w: true,
-          title: "1 1",
-          description: "room 1 1",
-        },
-        {
-          n: true,
-          e: true,
-          s: false,
-          w: false,
-          title: "1 2",
-          description: "room 1 2",
-        },
-        {
-          n: false,
-          e: false,
-          s: false,
-          w: true,
-          title: "1 3",
-          description: "room 1 3",
-        },
-      ],
-      [
-        {
-          n: false,
-          e: false,
-          s: true,
-          w: false,
-          title: "2 0",
-          description: "room 2 0",
-        },
-        {
-          n: true,
-          e: false,
-          s: true,
-          w: false,
-          title: "2 1",
-          description: "room 2 1",
-        },
-        {
-          n: false,
-          e: false,
-          s: false,
-          w: false,
-          title: "2 2",
-          description: "room 2 2",
-        },
-        {
-          n: false,
-          e: false,
-          s: false,
-          w: false,
-          title: "2 3",
-          description: "room 2 3",
-        },
-      ],
-      [
-        {
-          n: true,
-          e: true,
-          s: false,
-          w: false,
-          title: "3 0",
-          description: "room 3 0",
-        },
-        {
-          n: true,
-          e: false,
-          s: false,
-          w: true,
-          title: "3 1",
-          description: "room 3 1",
-        },
-        {
-          n: false,
-          e: true,
-          s: true,
-          w: false,
-          title: "3 2",
-          description: "room 3 2",
-        },
-        {
-          n: false,
-          e: false,
-          s: false,
-          w: true,
-          title: "3 3",
-          description: "room 3 3",
-        },
-      ],
-    ],
+    maze: [],
     backendURL: "https://build-week-civil-disobedients.herokuapp.com",
   }
 
   componentDidMount() {
     document.addEventListener("keydown", this.keyPressed, false)
-    // this.getRooms()
+    this.getRooms()
     isLoggedIn()
   }
 
@@ -246,12 +109,13 @@ class SecondPage extends Component {
 
   getRooms = () => {
     const token = localStorage.getItem("py-maze-jwt")
+    const decoded = jwtDecode(token)
     axios
       .get(`${this.state.backendURL}/api/rooms/`, {
         headers: { Authorization: token },
       })
       .then(res => {
-        this.setState({ maze: res.data })
+        this.setState({ maze: res.data, name: decoded.id })
       })
       .catch(err => {
         console.log(err)
@@ -260,10 +124,6 @@ class SecondPage extends Component {
 
   playerPut = (name, title, token) => {
     console.log("player putting")
-    console.log(
-      "next: ",
-      this.state.maze[this.state.playerY][this.state.playerX].title
-    )
     axios
       .put(
         `${this.state.backendURL}/auth/users/move/`,
@@ -281,32 +141,33 @@ class SecondPage extends Component {
       )
       .then(res => {
         console.log("put succeeded", res.data)
+        if (this.state.error_msg) {
+          this.setState({ error_msg: "" })
+        }
       })
       .catch(err => {
         console.log(err)
+        this.setState({ error_msg: err })
       })
   }
 
   currentRoom = () => this.state.maze[this.state.playerY][this.state.playerX]
 
   move = direction => {
-    console.log("moving", direction)
     const token = localStorage.getItem("py-maze-jwt")
     const decoded = jwtDecode(token)
     switch (direction) {
       case "n":
-        if (
-          this.state.playerY > 0 &&
-          !this.state.maze[this.state.playerY][this.state.playerX].n
-        ) {
+        if (this.state.playerY > 0 && !this.currentRoom().n) {
           this.setState({ playerY: this.state.playerY - 1 })
           this.playerPut(decoded.id, this.currentRoom().title, token)
         }
         break
       case "e":
         if (
+          this.state.maze.length &&
           this.state.playerX < this.state.maze[0].length - 1 &&
-          !this.state.maze[this.state.playerY][this.state.playerX].e
+          !this.currentRoom().e
         ) {
           this.setState({ playerX: this.state.playerX + 1 })
           this.playerPut(decoded.id, this.currentRoom().title, token)
@@ -314,18 +175,16 @@ class SecondPage extends Component {
         break
       case "s":
         if (
+          this.state.maze.length &&
           this.state.playerY < this.state.maze.length - 1 &&
-          !this.state.maze[this.state.playerY][this.state.playerX].s
+          !this.currentRoom().s
         ) {
           this.setState({ playerY: this.state.playerY + 1 })
           this.playerPut(decoded.id, this.currentRoom().title, token)
         }
         break
       case "w":
-        if (
-          this.state.playerX > 0 &&
-          !this.state.maze[this.state.playerY][this.state.playerX].w
-        ) {
+        if (this.state.playerX > 0 && !this.currentRoom().w) {
           this.setState({ playerX: this.state.playerX - 1 })
           this.playerPut(decoded.id, this.currentRoom().title, token)
         }
@@ -352,17 +211,17 @@ class SecondPage extends Component {
   }
 
   render() {
-    const { playerX, playerY, name, title, description, players } = this.state
+    const { playerX, playerY, name, maze, players, error_msg } = this.state
 
     const getBorders = (row, row_i, cell, col_i) => ({
       top: cell.n || row_i === 0,
       right: cell.e || col_i === row.length - 1,
-      bottom: cell.s || row_i === this.state.maze.length - 1,
+      bottom: cell.s || row_i === maze.length - 1,
       left: cell.w || col_i === 0,
     })
 
     const GameRows = () =>
-      this.state.maze.map((row, row_i) =>
+      maze.map((row, row_i) =>
         row.map((cell, col_i) => (
           <GameSquare
             key={row_i + col_i}
@@ -377,17 +236,14 @@ class SecondPage extends Component {
         ))
       )
 
-    const getColumns = maze => maze[0].length
-    const getRows = maze => maze.length
+    if (!maze.length) return <h1>Loading...</h1>
+    if (error_msg) return <h1>{error_msg}</h1>
     return (
       <Layout>
         <SEO title="The Maze" />
         <h1>The Maze</h1>
         <GameWrapper>
-          <GameBox
-            columns={getColumns(this.state.maze)}
-            rows={getRows(this.state.maze)}
-          >
+          <GameBox columns={maze[0].length} rows={maze.length}>
             <GameRows />
           </GameBox>
           <GameControls>
@@ -410,9 +266,9 @@ class SecondPage extends Component {
           <p>You are currently in {this.currentRoom().title}</p>
           <p>{this.currentRoom().description}</p>
           <p>
-            Players:
+            Players in this room: {name} (you)
             {players.map(p => (
-              <span key={p}>{" " + p}</span>
+              <span key={p}>{", " + p}</span>
             ))}
           </p>
         </div>
