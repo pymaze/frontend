@@ -20,6 +20,11 @@ const GameWrapper = styled.div`
   display: grid;
   grid-template-columns: 1fr;
   gap: 1em;
+  width: 60%;
+`
+const DisplayWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
 `
 
 const GameControls = styled.div`
@@ -90,8 +95,6 @@ class SecondPage extends Component {
     playerY: 0,
     error_msg: "",
     name: "", // *** Name of the logged-in player
-    title: "", // *** Title of the current room
-    description: "", // *** Description of the current room
     players: [], // *** Players in the current room
     maze: [],
     backendURL: "https://build-week-civil-disobedients.herokuapp.com",
@@ -242,36 +245,38 @@ class SecondPage extends Component {
       <Layout>
         <SEO title="The Maze" />
         <h1>The Maze</h1>
-        <GameWrapper>
-          <GameBox columns={maze[0].length} rows={maze.length}>
-            <GameRows />
-          </GameBox>
-          <GameControls>
-            <div className="control" onClick={() => this.move("w")}>
-              <FontAwesomeIcon icon={faChevronLeft} size="2x" />
-            </div>
-            <div className="control" onClick={() => this.move("n")}>
-              <FontAwesomeIcon icon={faChevronUp} size="2x" />
-            </div>
-            <div className="control" onClick={() => this.move("s")}>
-              <FontAwesomeIcon icon={faChevronDown} size="2x" />
-            </div>
-            <div className="control" onClick={() => this.move("e")}>
-              <FontAwesomeIcon icon={faChevronRight} size="2x" />
-            </div>
-          </GameControls>
-        </GameWrapper>
-        <div>
-          <h2>{name}</h2>
-          <p>You are currently in {this.currentRoom().title}</p>
-          <p>{this.currentRoom().description}</p>
-          <p>
-            Players in this room: {name} (you)
-            {players.map(p => (
-              <span key={p}>{", " + p}</span>
-            ))}
-          </p>
-        </div>
+        <DisplayWrapper>
+          <GameWrapper>
+            <GameBox columns={maze[0].length} rows={maze.length}>
+              <GameRows />
+            </GameBox>
+            <GameControls>
+              <div className="control" onClick={() => this.move("w")}>
+                <FontAwesomeIcon icon={faChevronLeft} size="2x" />
+              </div>
+              <div className="control" onClick={() => this.move("n")}>
+                <FontAwesomeIcon icon={faChevronUp} size="2x" />
+              </div>
+              <div className="control" onClick={() => this.move("s")}>
+                <FontAwesomeIcon icon={faChevronDown} size="2x" />
+              </div>
+              <div className="control" onClick={() => this.move("e")}>
+                <FontAwesomeIcon icon={faChevronRight} size="2x" />
+              </div>
+            </GameControls>
+          </GameWrapper>
+          <div style={{ width: "35%" }}>
+            <h2>{name}</h2>
+            <h2>Current location: {this.currentRoom().title}</h2>
+            <h3>{this.currentRoom().description}</h3>
+            <h4>
+              Players in this room: {name} (you)
+              {players.map(p => (
+                <span key={p}>{", " + p}</span>
+              ))}
+            </h4>
+          </div>
+        </DisplayWrapper>
         {/* <Link to="/">Go back to the homepage</Link> */}
       </Layout>
     )
